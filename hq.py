@@ -14,12 +14,12 @@ def getTime(checkpoint):
 
 def getSS(x1,y1,x2,y2,filename,showImg):
 	im=ImageGrab.grab(bbox=(x1,y1,x2,y2))
-	im.save('C:\\Users\\ZinK\\Desktop\\hq\\' + filename) # X1,Y1,X2,Y2
+	im.save(filename) # X1,Y1,X2,Y2
 	if showImg:
 		im.show()
 
 def getText(filename):
-	img=Image.open('C:\\Users\\ZinK\\Desktop\\hq\\' + filename)
+	img=Image.open(filename)
 	text = image_to_string(img)
 	return text
 
