@@ -24,8 +24,7 @@ def getText(filename):
 	return text
 
 def get_results(question, answer):
-	concatinate = question + " " + answer
-	print concatinate
+	concatinate = answer + " " + question  
 	re = requests.get('https://www.google.com/search', params={'q':concatinate})
 	soup = bs(re.text, "html.parser")
 	response = soup.find('div', {'class': 'sd'})
