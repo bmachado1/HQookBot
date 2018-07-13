@@ -5,10 +5,10 @@ import time
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup as bs
-from googlesearch import search
 import string
 from bs4.element import Comment
 from threading import Thread
+from googlesearch import search
 
 char_whitelist = string.digits
 char_whitelist += string.ascii_lowercase
@@ -103,27 +103,58 @@ def results_ratio(rqa1,rqa2,rqa3,ra1,ra2,ra3):
     if ra3_adjusted>ra1_adjusted and ra3_adjusted>ra2_adjusted:
         print ("3")
 
-def get_DuckDuckGo_filtered(answer, question):
-    wordList = answer.split()
+def createURL(question):
+    words = question.split()
+    string_URL = ""
+    for word in words:
+        string_URL += word
+        string_URL += "%20"
+    return string_URL
+
+def get_DuckDuckGo_filtered(answer1, answer2, answer3, question):
+    a1words = answer1.split()
+    a2words = answer2.split()
+    a3words = answer3.split()
+
+    print(a1words)
+    print(a2words)
+    print(a3words)
+    qwords = [a1words,a2words,a3words]
     answerTotal = 0;
-    payload = {
-        "q": question,
-        "b":"" ,
-        "kl":"us-en"
-    }
-    re = requests.get('https://duckduckgo.com/html/', data = payload)
+    url = 'https://duckduckgo.com/html?q=' + str(question)
+
+    header = {
+        "authority":"duckduckgo.com",
+        "method":"GET",
+        "path":url,
+        "scheme":"https",
+        "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+        "accept-encoding":"gzip, deflate, br",
+        "accept-language":"en-GB,en-US;q=0.9,en;q=0.8",
+        "cache-control":"max-age=0",
+        "cookie":"ax=v125-2",
+        "upgrade-insecure-requests":"1",
+        "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
+       }
+    re = requests.get(url, headers=header)
     soup = bs(re.text, "html.parser")
     answerTotal = [0,0,0]
-    for i in range(0,len(wordList)):
-        if str(wordList[i]) in str(soup):
-            answerTotal[i] += 1
-            print('success' + wordList[i])
+    for i in range(0,3):
+        for j in range(0, len(qwords[i])):
+            answerTotal[i] += str(soup).count(str(qwords[i][j]))
+
     if answerTotal[0]>answerTotal[1] and answerTotal[0]>answerTotal[2]:
-        print (wordList[0])
+        print ('1')
     if answerTotal[1]>answerTotal[0] and answerTotal[1]>answerTotal[2]:
-        print(wordList[1])
+        print('2')
     if answerTotal[2]>answerTotal[0] and answerTotal[2]>answerTotal[1]:
-        print (wordList[2])
+        print ('3')
+
+def continuousGoogle():      
+    response = GoogleSearch().search("something")
+    for result in response.results:
+        print("Title: " + result.title)
+        print("Content: " + result.getText())
 
 class ThreadWithReturnValue(Thread):
     def __init__(self, group=None, target=None, name=None,
@@ -141,12 +172,14 @@ class ThreadWithReturnValue(Thread):
 
 
 
+
+
     
 if __name__ == '__main__':
-    getSS(700,150,1180,290,"hqQ.png", False)
-    getSS(700,300,1050,340,"hqA1.png", False)
-    getSS(700,360,1050,400,"hqA2.png", False)
-    getSS(700,420,1050,455,"hqA3.png", False)
+    # getSS(700,150,1180,290,"hqQ.png", False)
+    # getSS(700,300,1050,340,"hqA1.png", False)
+    # getSS(700,360,1050,400,"hqA2.png", False)
+    # getSS(700,420,1050,455,"hqA3.png", False)
 
     
     thread_qtext = ThreadWithReturnValue(target = getText, args = ("hqQ.png", ))
@@ -164,50 +197,36 @@ if __name__ == '__main__':
     a2text = thread_a1text.join()
     a3text =  thread_a3text.join()
 
-    print(qtext)
-
     print ("text thread finished...exiting")
 
     print ("results thread starting...")
+    continuousGoogle()
+    # get_DuckDuckGo_filtered(a1text, a2text, a3text, createURL(qtext))
 
-    # get_DuckDuckGo_filtered(a1text, qtext)
-    # print (checkEasy(qtext))
+    # qa1_results_thread =  ThreadWithReturnValue(target = get_results_with_question, args = (qtext, a1text, ))
+    # qa2_results_thread =  ThreadWithReturnValue(target = get_results_with_question, args = (qtext, a2text, ))
+    # qa3_results_thread =  ThreadWithReturnValue(target = get_results_with_question, args = (qtext, a3text, ))
 
-    qa1_results_thread =  ThreadWithReturnValue(target = get_results_with_question, args = (qtext, a1text, ))
-    qa2_results_thread =  ThreadWithReturnValue(target = get_results_with_question, args = (qtext, a2text, ))
-    qa3_results_thread =  ThreadWithReturnValue(target = get_results_with_question, args = (qtext, a3text, ))
+    # a1_results_thread =  ThreadWithReturnValue(target = get_results, args = (a1text, ))
+    # a2_results_thread =  ThreadWithReturnValue(target = get_results, args = (a2text, ))
+    # a3_results_thread =  ThreadWithReturnValue(target = get_results, args = (a3text, ))
 
-    a1_results_thread =  ThreadWithReturnValue(target = get_results, args = (a1text, ))
-    a2_results_thread =  ThreadWithReturnValue(target = get_results, args = (a2text, ))
-    a3_results_thread =  ThreadWithReturnValue(target = get_results, args = (a3text, ))
+    # qa1_results_thread.start()
+    # qa2_results_thread.start()
+    # qa3_results_thread.start()
+    # a1_results_thread.start()
+    # a2_results_thread.start()
+    # a3_results_thread.start()
 
-    qa1_results_thread.start()
-    qa2_results_thread.start()
-    qa3_results_thread.start()
-    a1_results_thread.start()
-    a2_results_thread.start()
-    a3_results_thread.start()
+    # qa1_results =  qa1_results_thread.join()
+    # qa2_results =  qa2_results_thread.join()
+    # qa3_results =  qa3_results_thread.join()
 
-    qa1_results =  qa1_results_thread.join()
-    qa2_results =  qa2_results_thread.join()
-    qa3_results =  qa3_results_thread.join()
+    # a1_results =  a3_results_thread.join()
+    # a2_results =  a3_results_thread.join()
+    # a3_results =  a3_results_thread.join()
 
-    a1_results =  a3_results_thread.join()
-    a2_results =  a3_results_thread.join()
-    a3_results =  a3_results_thread.join()
-
-    only_results(qa1_results,qa2_results,qa3_results)
-    results_ratio(qa1_results,qa2_results,qa3_results, a1_results, a2_results, a3_results)
+    # only_results(qa1_results,qa2_results,qa3_results)
+    # results_ratio(qa1_results,qa2_results,qa3_results, a1_results, a2_results, a3_results)
 
     getTime("Done")
-
-
-    # results_ratio(a1,a2,a3)
-
-     #    qtext = getText("hqQ.png")
- #    a1text = getText("hqA1.png")
- #    a2text = getText("hqA2.png")
- #    a3text = getText("hqA3.png")
-
-
-
